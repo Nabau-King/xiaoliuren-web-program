@@ -1,0 +1,22 @@
+{
+  "name": "小六壬掌诀排盘",
+  "short_name": "小六壬",
+  "description": "即时小六壬掌诀排盘、动画演示、解析与分享卡片。",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4efe6",
+  "theme_color": "#102522",
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

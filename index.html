@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#102522">
   <meta name="description" content="小六壬即时排盘：显示当前时间、阴历、时辰、六神结果、方向解析与掌诀计算过程。">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icon-192.png">
   <title>小六壬掌诀排盘</title>
   <style>
     :root {
@@ -39,6 +41,19 @@
       background:
         linear-gradient(135deg, rgba(197, 148, 66, .16), transparent 34%),
         linear-gradient(225deg, rgba(15, 117, 104, .14), transparent 36%),
+        var(--bg);
+    }
+
+    body.theme-dark {
+      --bg: #101815;
+      --surface: #16231f;
+      --surface-2: #1d2b26;
+      --ink: #eef7f2;
+      --muted: #aab8b0;
+      --line: rgba(231, 241, 235, .16);
+      background:
+        linear-gradient(135deg, rgba(197, 148, 66, .12), transparent 34%),
+        linear-gradient(225deg, rgba(15, 117, 104, .2), transparent 36%),
         var(--bg);
     }
 
@@ -194,6 +209,16 @@
       padding: 0 11px;
       color: var(--ink);
       background: #fffdf8;
+    }
+
+    body.theme-dark .field input,
+    body.theme-dark .field select,
+    body.theme-dark .process-actions select,
+    body.theme-dark .nudge-grid select,
+    body.theme-dark .mini-btn,
+    body.theme-dark .coord-output {
+      color: var(--ink);
+      background: #13201c;
     }
 
     .button-row {
@@ -397,6 +422,18 @@
       pointer-events: none;
     }
 
+    .palm-canvas.palm-ink .palm-img {
+      filter: grayscale(1) contrast(1.08) brightness(1.03) drop-shadow(0 22px 34px rgba(54, 43, 33, .12));
+    }
+
+    .palm-canvas.palm-soft .palm-img {
+      filter: saturate(.72) contrast(.96) brightness(1.06) drop-shadow(0 22px 34px rgba(54, 43, 33, .1));
+    }
+
+    .palm-canvas.palm-watercolor .palm-img {
+      filter: drop-shadow(0 22px 34px rgba(54, 43, 33, .12));
+    }
+
     .palm-canvas picture {
       display: contents;
     }
@@ -426,6 +463,18 @@
       cursor: grab;
       outline: 2px dashed rgba(15, 117, 104, .35);
       outline-offset: 4px;
+    }
+
+    .calibration-mode::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(15, 117, 104, .14) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 117, 104, .14) 1px, transparent 1px);
+      background-size: 10% 10%;
+      mix-blend-mode: multiply;
     }
 
     .calibration-mode .node:active {
@@ -665,6 +714,24 @@
       gap: 8px;
     }
 
+    .nudge-grid {
+      display: grid;
+      grid-template-columns: 1fr repeat(3, 40px);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .nudge-grid select {
+      height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 0 9px;
+      color: var(--ink);
+      background: #fffdf8;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
     .mini-btn {
       min-height: 34px;
       border: 1px solid var(--line);
@@ -703,6 +770,15 @@
       border-radius: 7px;
       padding: 10px;
       background: rgba(255, 255, 255, .62);
+      cursor: pointer;
+      transition: border-color .2s ease, transform .2s ease;
+    }
+
+    .history-item:hover,
+    .history-item:focus {
+      border-color: rgba(197, 148, 66, .72);
+      transform: translateY(-1px);
+      outline: none;
     }
 
     .history-item b {
@@ -727,6 +803,51 @@
 
     .notice strong {
       color: var(--ink);
+    }
+
+    .onboarding {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(16, 24, 21, .48);
+      backdrop-filter: blur(10px);
+    }
+
+    .onboarding.open {
+      display: grid;
+    }
+
+    .onboarding-card {
+      width: min(520px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 22px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .onboarding-card h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
+    }
+
+    .onboarding-card ol {
+      margin: 0;
+      padding-left: 22px;
+      color: #4f5c56;
+      line-height: 1.8;
+    }
+
+    body.theme-dark .onboarding-card ol {
+      color: var(--muted);
+    }
+
+    .onboarding-card .btn {
+      width: 100%;
+      margin-top: 18px;
     }
 
     .phase-status {
@@ -1012,6 +1133,33 @@
                 <option value="feeling">感情</option>
               </select>
             </div>
+            <div class="field">
+              <label for="questionText">问事内容</label>
+              <input id="questionText" type="text" maxlength="60" placeholder="例如：明天面试顺不顺">
+            </div>
+            <div class="field">
+              <label for="analysisStyle">解析风格</label>
+              <select id="analysisStyle">
+                <option value="simple">简洁建议</option>
+                <option value="traditional">传统术语</option>
+                <option value="action">行动清单</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="palmTheme">手掌风格</label>
+              <select id="palmTheme">
+                <option value="watercolor">水彩</option>
+                <option value="soft">柔和</option>
+                <option value="ink">线稿</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="colorTheme">界面主题</label>
+              <select id="colorTheme">
+                <option value="light">浅色</option>
+                <option value="dark">深色</option>
+              </select>
+            </div>
             <div class="button-row">
               <button class="btn" id="resetNow" type="button">回到此刻</button>
               <button class="btn secondary" id="copyResult" type="button">复制结果</button>
@@ -1108,6 +1256,14 @@
             <button class="mini-btn" id="resetCalibration" type="button">恢复默认</button>
             <button class="mini-btn" id="copyCalibration" type="button">复制 JSON</button>
           </div>
+          <div class="nudge-grid">
+            <select id="calibrationTarget" aria-label="选择要微调的点位"></select>
+            <button class="mini-btn" data-nudge="up" type="button">↑</button>
+            <button class="mini-btn" data-nudge="down" type="button">↓</button>
+            <button class="mini-btn" data-nudge="left" type="button">←</button>
+            <span></span>
+            <button class="mini-btn" data-nudge="right" type="button">→</button>
+          </div>
           <textarea class="coord-output" id="coordOutput" readonly></textarea>
         </section>
       </section>
@@ -1156,6 +1312,18 @@
       <p><strong>提示：</strong>小六壬结果适合用于参考、自省和整理思路，不应替代医疗、法律、投资或其他现实高风险决策。</p>
     </section>
   </main>
+
+  <div class="onboarding" id="onboarding">
+    <div class="onboarding-card">
+      <h2>三步使用小六壬</h2>
+      <ol>
+        <li>先看左侧当前六神结果和阴历、时辰取数。</li>
+        <li>在掌诀图中查看六个固定点位与最终落点。</li>
+        <li>点击“播放过程”，看月、日、时如何依次接续计数。</li>
+      </ol>
+      <button class="btn" id="closeOnboarding" type="button">开始使用</button>
+    </div>
+  </div>
 
   <script>
     const SIX = [
@@ -1272,6 +1440,12 @@
       feeling: "感情"
     };
 
+    const TIME_ZONE_GROUPS = [
+      ["常用", ["Asia/Shanghai", "Asia/Taipei", "Asia/Hong_Kong", "Asia/Singapore", "UTC"]],
+      ["亚洲", ["Asia/Tokyo", "Asia/Seoul", "Asia/Bangkok", "Asia/Kuala_Lumpur", "Asia/Dubai"]],
+      ["全球", ["Europe/London", "Europe/Paris", "America/New_York", "America/Los_Angeles", "Australia/Sydney"]]
+    ];
+
     const $ = (id) => document.getElementById(id);
     let nodePositions = loadNodePositions();
     const state = {
@@ -1283,7 +1457,9 @@
       isPlaying: false,
       defaultResultIndex: null,
       calibrationMode: false,
-      draggingNode: null
+      draggingNode: null,
+      dragFrame: null,
+      pendingDrag: null
     };
     const PHASE_META = {
       month: { label: "月", color: "var(--red)", hint: "从大安起数阴历月" },
@@ -1297,6 +1473,39 @@
 
     function inputValue(date) {
       return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    function initPreferences() {
+      $("colorTheme").value = localStorage.getItem("xlrColorTheme") || "light";
+      $("palmTheme").value = localStorage.getItem("xlrPalmTheme") || "watercolor";
+      $("analysisStyle").value = localStorage.getItem("xlrAnalysisStyle") || "simple";
+      applyColorTheme();
+      applyPalmTheme();
+    }
+
+    function applyColorTheme() {
+      const theme = $("colorTheme").value;
+      document.body.classList.toggle("theme-dark", theme === "dark");
+      localStorage.setItem("xlrColorTheme", theme);
+    }
+
+    function applyPalmTheme() {
+      const theme = $("palmTheme").value;
+      const canvas = $("palmCanvas");
+      if (!canvas) return;
+      canvas.classList.remove("palm-watercolor", "palm-soft", "palm-ink");
+      canvas.classList.add(`palm-${theme}`);
+      localStorage.setItem("xlrPalmTheme", theme);
+    }
+
+    function initOnboarding() {
+      if (localStorage.getItem("xlrOnboardingSeen") === "1") return;
+      $("onboarding").classList.add("open");
+    }
+
+    function closeOnboarding() {
+      localStorage.setItem("xlrOnboardingSeen", "1");
+      $("onboarding").classList.remove("open");
     }
 
     function loadNodePositions() {
@@ -1317,14 +1526,33 @@
 
     function initZones() {
       const local = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Shanghai";
-      const zones = Array.from(new Set(["Asia/Shanghai", local, "Asia/Taipei", "Asia/Hong_Kong", "Asia/Singapore", "UTC"]));
-      $("timeZone").innerHTML = zones.map((zone) => {
-        const label = TIME_ZONE_LABELS[zone] || `本机时区（${zone}）`;
-        return `<option value="${zone}">${label}</option>`;
-      }).join("");
+      const groups = TIME_ZONE_GROUPS.map(([label, zones]) => [label, Array.from(new Set(label === "常用" ? [local, ...zones] : zones))]);
+      $("timeZone").innerHTML = groups.map(([label, zones]) => `
+        <optgroup label="${label}">
+          ${zones.map((zone) => `<option value="${zone}">${timeZoneLabel(zone, local)}</option>`).join("")}
+        </optgroup>
+      `).join("");
       $("timeZone").value = "Asia/Shanghai";
       $("manualDate").value = inputValue(new Date());
       $("manualDate").disabled = true;
+    }
+
+    function timeZoneLabel(zone, local) {
+      const base = TIME_ZONE_LABELS[zone] || (zone === local ? `本机时区（${zone}）` : zone);
+      return `${base} ${timeZoneOffsetText(zone)}`;
+    }
+
+    function timeZoneOffsetText(zone) {
+      if (zone === "UTC") return "UTC+0";
+      try {
+        const part = new Intl.DateTimeFormat("en-US", {
+          timeZone: zone,
+          timeZoneName: "shortOffset"
+        }).formatToParts(new Date()).find((item) => item.type === "timeZoneName");
+        return part?.value?.replace("GMT", "UTC") || "";
+      } catch {
+        return "";
+      }
     }
 
     function buildStatic() {
@@ -1344,19 +1572,42 @@
           <p>${item.short}</p>
         </article>
       `).join("");
+      $("calibrationTarget").innerHTML = SIX.map((item, index) => `<option value="${index}">${item.name} · ${nodePositions[index].joint}</option>`).join("");
       bindCalibrationDrag();
       updateCoordOutput();
     }
 
     function updateNodeStyles() {
       nodePositions.forEach((pos, index) => {
-        const node = $(`node-${index}`);
-        if (!node) return;
-        node.style.setProperty("--x", `${pos.x}%`);
-        node.style.setProperty("--y", `${pos.y}%`);
-        node.title = `${SIX[index].name}：${pos.joint}`;
+        updateSingleNodeStyle(index);
       });
       updateCoordOutput();
+    }
+
+    function updateSingleNodeStyle(index) {
+      const pos = nodePositions[index];
+      const node = $(`node-${index}`);
+      if (!node || !pos) return;
+      node.style.setProperty("--x", `${pos.x}%`);
+      node.style.setProperty("--y", `${pos.y}%`);
+      node.title = `${SIX[index].name}：${pos.joint}`;
+    }
+
+    function scheduleDragUpdate(index, x, y) {
+      state.pendingDrag = { index, x, y };
+      if (state.dragFrame) return;
+      state.dragFrame = requestAnimationFrame(() => {
+        const pending = state.pendingDrag;
+        state.dragFrame = null;
+        state.pendingDrag = null;
+        if (!pending) return;
+        nodePositions[pending.index] = {
+          ...nodePositions[pending.index],
+          x: pending.x,
+          y: pending.y
+        };
+        updateSingleNodeStyle(pending.index);
+      });
     }
 
     function updateCoordOutput() {
@@ -1383,18 +1634,22 @@
           const rect = canvas.getBoundingClientRect();
           const x = Math.min(96, Math.max(4, ((event.clientX - rect.left) / rect.width) * 100));
           const y = Math.min(96, Math.max(4, ((event.clientY - rect.top) / rect.height) * 100));
-          nodePositions[state.draggingNode] = {
-            ...nodePositions[state.draggingNode],
-            x,
-            y
-          };
-          updateNodeStyles();
+          scheduleDragUpdate(state.draggingNode, x, y);
         });
         node.addEventListener("pointerup", () => {
+          if (state.pendingDrag) {
+            nodePositions[state.pendingDrag.index] = {
+              ...nodePositions[state.pendingDrag.index],
+              x: state.pendingDrag.x,
+              y: state.pendingDrag.y
+            };
+          }
           state.draggingNode = null;
+          updateCoordOutput();
         });
         node.addEventListener("pointercancel", () => {
           state.draggingNode = null;
+          updateCoordOutput();
         });
       });
     }
@@ -1429,6 +1684,25 @@
         $("copyCalibration").textContent = "复制失败";
         window.setTimeout(() => $("copyCalibration").textContent = "复制 JSON", 1200);
       }
+    }
+
+    function nudgeCalibration(direction) {
+      const index = Number($("calibrationTarget").value || 0);
+      const step = 0.1;
+      const delta = {
+        up: [0, -step],
+        down: [0, step],
+        left: [-step, 0],
+        right: [step, 0]
+      }[direction];
+      if (!delta) return;
+      nodePositions[index] = {
+        ...nodePositions[index],
+        x: Math.min(96, Math.max(4, nodePositions[index].x + delta[0])),
+        y: Math.min(96, Math.max(4, nodePositions[index].y + delta[1]))
+      };
+      updateSingleNodeStyle(index);
+      updateCoordOutput();
     }
 
     function getDate() {
@@ -1592,6 +1866,46 @@
       $("stopProcess").disabled = !isPlaying;
     }
 
+    function formatAnalysis(item, type, text) {
+      const style = $("analysisStyle").value;
+      if (style === "traditional") {
+        return `<p><strong>象意：</strong>${item.short}。<br><strong>断语：</strong>${text}</p>`;
+      }
+      if (style === "action") {
+        return `<p><strong>宜：</strong>${actionDo(item.name, type)}<br><strong>忌：</strong>${actionAvoid(item.name)}<br><strong>建议：</strong>${text}</p>`;
+      }
+      return `<p>${text}</p>`;
+    }
+
+    function actionDo(name, type) {
+      const byResult = {
+        "大安": "稳住节奏，先完成确定事项。",
+        "留连": "补齐信息，确认边界和时间。",
+        "速喜": "快速响应，主动推进。",
+        "赤口": "保留记录，先降温再沟通。",
+        "小吉": "借助熟人资源，小步完成。",
+        "空亡": "暂停冒进，先做验证和止损。"
+      };
+      const byType = {
+        life: "从身边小事入手。",
+        work: "明确责任人与交付标准。",
+        wealth: "核对金额、凭证和期限。",
+        feeling: "先表达善意，再谈判断。"
+      };
+      return `${byResult[name] || "谨慎推进"}${byType[type] || ""}`;
+    }
+
+    function actionAvoid(name) {
+      return {
+        "大安": "突然变招。",
+        "留连": "拖着不确认。",
+        "速喜": "因赶时间漏条件。",
+        "赤口": "情绪化争辩。",
+        "小吉": "贪大求快。",
+        "空亡": "冲动承诺或投入。"
+      }[name] || "仓促决定。";
+    }
+
     function render(result) {
       const item = SIX[result.resultIndex];
       state.latest = result;
@@ -1627,7 +1941,7 @@
       $("analysisList").innerHTML = domains.map(([type, title, text]) => `
         <article class="analysis-card ${type === focusType ? "focus" : ""}">
           <b>${title}</b>
-          <p>${text}</p>
+          ${formatAnalysis(item, type, text)}
         </article>
       `).join("");
 
@@ -1711,13 +2025,18 @@
     function resultSummary(result = state.latest || calculate()) {
       const item = SIX[result.resultIndex];
       const questionType = $("questionType").value;
+      const date = getDate();
       return {
         savedAt: new Date().toISOString(),
+        manualDate: inputValue(date),
+        timeZone: $("timeZone").value,
         resultName: item.name,
         short: item.short,
         tone: item.tone,
         questionType,
         questionLabel: DOMAIN_LABELS[questionType],
+        questionText: $("questionText").value.trim(),
+        analysisStyle: $("analysisStyle").value,
         solar: `${result.solar.year}-${result.solar.month}-${result.solar.day} ${result.solar.hour}:${result.solar.minute}`,
         lunar: result.lunar.text,
         branch: `${result.branch.name}时`,
@@ -1742,11 +2061,25 @@
         return;
       }
       $("historyList").innerHTML = history.map((entry) => `
-        <article class="history-item">
+        <article class="history-item" data-history="${entry.savedAt}" role="button" tabindex="0">
           <b><span>${entry.resultName} · ${entry.questionLabel || "综合"}</span><span>${entry.branch}</span></b>
-          <span>${entry.lunar} / ${entry.solar}</span>
+          <span>${entry.questionText ? `“${entry.questionText}” · ` : ""}${entry.lunar} / ${entry.solar}</span>
         </article>
       `).join("");
+    }
+
+    function restoreHistory(savedAt) {
+      const entry = loadHistory().find((item) => item.savedAt === savedAt);
+      if (!entry) return;
+      $("mode").value = "manual";
+      $("manualDate").disabled = false;
+      $("manualDate").value = entry.manualDate || inputValue(new Date());
+      $("timeZone").value = entry.timeZone || "Asia/Shanghai";
+      $("questionType").value = entry.questionType || "general";
+      $("questionText").value = entry.questionText || "";
+      $("analysisStyle").value = entry.analysisStyle || "simple";
+      localStorage.setItem("xlrAnalysisStyle", $("analysisStyle").value);
+      update();
     }
 
     function saveHistory() {
@@ -1795,10 +2128,20 @@
       return cursorY + lineHeight;
     }
 
-    function shareCard() {
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = src;
+      });
+    }
+
+    async function shareCard() {
       const result = state.latest || calculate();
       const item = SIX[result.resultIndex];
       const summary = resultSummary(result);
+      const handImage = await loadImage("assets/palm-left-generated.webp").catch(() => null);
       const canvas = document.createElement("canvas");
       canvas.width = 1080;
       canvas.height = 1440;
@@ -1825,15 +2168,31 @@
       ctx.font = "600 34px Microsoft YaHei, sans-serif";
       ctx.fillText(item.short, 150, 405);
 
+      if (handImage) {
+        ctx.save();
+        roundRect(ctx, 690, 150, 240, 300, 22);
+        ctx.clip();
+        ctx.fillStyle = "rgba(255,250,241,.92)";
+        ctx.fillRect(690, 150, 240, 300);
+        ctx.drawImage(handImage, 705, 160, 210, 345);
+        ctx.restore();
+      }
+
       ctx.fillStyle = "#182521";
       ctx.font = "800 42px Microsoft YaHei, sans-serif";
-      ctx.fillText(`${summary.questionLabel}建议`, 130, 570);
+      ctx.fillText(`${summary.questionLabel}建议`, 130, 545);
+      let textStartY = 610;
+      if (summary.questionText) {
+        ctx.fillStyle = "#69766f";
+        ctx.font = "500 28px Microsoft YaHei, sans-serif";
+        textStartY = wrapCanvasText(ctx, `问事：${summary.questionText}`, 130, 592, 820, 40) + 20;
+      }
       ctx.font = "500 34px Microsoft YaHei, sans-serif";
       ctx.fillStyle = "#4d5b54";
       const domainText = summary.questionType === "general"
         ? `${item.tone}。${item.life}`
         : item[summary.questionType];
-      const nextY = wrapCanvasText(ctx, domainText, 130, 635, 820, 52);
+      const nextY = wrapCanvasText(ctx, domainText, 130, textStartY, 820, 52);
 
       ctx.fillStyle = "#182521";
       ctx.font = "800 34px Microsoft YaHei, sans-serif";
@@ -1859,7 +2218,9 @@
 
     initZones();
     buildStatic();
+    initPreferences();
     update();
+    initOnboarding();
 
     window.setInterval(() => {
       if ($("mode").value === "now" && !state.isPlaying) update();
@@ -1876,6 +2237,15 @@
     });
     $("timeZone").addEventListener("change", update);
     $("questionType").addEventListener("change", update);
+    $("questionText").addEventListener("input", () => {
+      state.latest = calculate();
+    });
+    $("analysisStyle").addEventListener("change", () => {
+      localStorage.setItem("xlrAnalysisStyle", $("analysisStyle").value);
+      update();
+    });
+    $("palmTheme").addEventListener("change", applyPalmTheme);
+    $("colorTheme").addEventListener("change", applyColorTheme);
     $("resetNow").addEventListener("click", () => {
       $("mode").value = "now";
       $("manualDate").value = inputValue(new Date());
@@ -1886,14 +2256,33 @@
     $("saveHistory").addEventListener("click", saveHistory);
     $("shareCard").addEventListener("click", shareCard);
     $("clearHistory").addEventListener("click", clearHistory);
+    $("historyList").addEventListener("click", (event) => {
+      const item = event.target.closest("[data-history]");
+      if (item) restoreHistory(item.dataset.history);
+    });
+    $("historyList").addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const item = event.target.closest("[data-history]");
+      if (item) restoreHistory(item.dataset.history);
+    });
     $("toggleCalibration").addEventListener("click", toggleCalibration);
     $("saveCalibration").addEventListener("click", saveCalibration);
     $("resetCalibration").addEventListener("click", resetCalibration);
     $("copyCalibration").addEventListener("click", copyCalibration);
+    document.querySelectorAll("[data-nudge]").forEach((button) => {
+      button.addEventListener("click", () => nudgeCalibration(button.dataset.nudge));
+    });
     $("playProcess").addEventListener("click", playTrace);
     $("stopProcess").addEventListener("click", stopTrace);
+    $("closeOnboarding").addEventListener("click", closeOnboarding);
     setPlaybackControls(false);
     renderHistory();
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      });
+    }
   </script>
 </body>
 </html>
