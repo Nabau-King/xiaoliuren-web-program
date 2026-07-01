@@ -1,0 +1,1215 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102522">
+  <meta name="description" content="小六壬即时排盘：显示当前时间、阴历、时辰、六神结果、方向解析与掌诀计算过程。">
+  <title>小六壬掌诀排盘</title>
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --surface: #fffaf1;
+      --surface-2: #f8f2e8;
+      --ink: #182521;
+      --muted: #69766f;
+      --line: rgba(31, 47, 43, .12);
+      --gold: #c59442;
+      --red: #c95e4b;
+      --blue: #2f86ba;
+      --green: #23956d;
+      --teal: #0f7568;
+      --shadow: 0 24px 70px rgba(35, 44, 39, .14);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Noto Sans SC", "Microsoft YaHei", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(135deg, rgba(197, 148, 66, .16), transparent 34%),
+        linear-gradient(225deg, rgba(15, 117, 104, .14), transparent 36%),
+        var(--bg);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 22px 0 44px;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 310px minmax(440px, 1fr) 360px;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 250, 241, .82);
+      box-shadow: 0 12px 30px rgba(28, 36, 32, .08);
+      backdrop-filter: blur(14px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      color: #fff;
+      background: radial-gradient(circle at 35% 30%, #d5aa57, #0f7568 68%);
+      font-weight: 900;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .38);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .tagline {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .clock {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .clock strong {
+      display: block;
+      font-size: clamp(22px, 3vw, 34px);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .clock span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 250, 241, .88);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 760px;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2,
+    .panel-head h3 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+
+    .panel-head span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+      padding: 16px 18px 18px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 0 11px;
+      color: var(--ink);
+      background: #fffdf8;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .btn {
+      height: 42px;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      padding: 0 13px;
+      font-weight: 900;
+      color: #fff;
+      background: var(--ink);
+    }
+
+    .btn.secondary {
+      color: var(--ink);
+      border-color: var(--line);
+      background: #fffdf8;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .result-block {
+      padding: 20px 18px 18px;
+      color: #fff;
+      background:
+        linear-gradient(155deg, rgba(16, 37, 34, .96), rgba(15, 117, 104, .94)),
+        #102522;
+    }
+
+    .result-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: rgba(255, 255, 255, .72);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .result-name {
+      margin: 13px 0 8px;
+      font-size: clamp(58px, 8vw, 84px);
+      line-height: .92;
+      font-weight: 950;
+    }
+
+    .result-brief {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, .9);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .chip {
+      border: 1px solid rgba(255, 255, 255, .28);
+      border-radius: 999px;
+      padding: 6px 10px;
+      color: rgba(255, 255, 255, .88);
+      background: rgba(255, 255, 255, .1);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .time-grid {
+      display: grid;
+      gap: 10px;
+      padding: 16px 18px 18px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 12px;
+      background: rgba(255, 255, 255, .62);
+    }
+
+    .metric span {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .metric b {
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 760px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stage-title {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 2px 2px 12px;
+    }
+
+    .stage-title h2 {
+      margin: 0;
+      font-size: clamp(23px, 3vw, 40px);
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .stage-title p {
+      max-width: 520px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      min-width: 220px;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, .66);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot.month { background: var(--red); }
+    .dot.day { background: var(--blue); }
+    .dot.hour { background: var(--green); }
+
+    .palm-wrap {
+      position: relative;
+      flex: 1;
+      display: grid;
+      place-items: center;
+      min-height: 600px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        radial-gradient(circle at 50% 38%, rgba(255, 255, 255, .95), rgba(255, 250, 241, .4) 58%, rgba(213, 187, 132, .18)),
+        #fffdf8;
+      overflow: hidden;
+    }
+
+    .palm-canvas {
+      position: relative;
+      width: min(92%, 520px);
+      aspect-ratio: 978 / 1609;
+    }
+
+    .palm-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 22px 34px rgba(54, 43, 33, .12));
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .node {
+      position: absolute;
+      left: var(--x);
+      top: var(--y);
+      width: 76px;
+      height: 76px;
+      translate: -50% -50%;
+      border: 2px solid rgba(24, 37, 33, .14);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      gap: 0;
+      padding: 8px 4px 6px;
+      text-align: center;
+      color: var(--ink);
+      background: rgba(255, 253, 248, .88);
+      box-shadow: 0 10px 24px rgba(33, 43, 39, .12);
+      transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
+      isolation: isolate;
+    }
+
+    .node b {
+      display: block;
+      font-size: 17px;
+      line-height: 1;
+      font-weight: 950;
+    }
+
+    .node small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .node::after {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border-radius: 50%;
+      border: 1px solid rgba(197, 148, 66, .32);
+      z-index: -1;
+    }
+
+    .node.result {
+      border-color: var(--gold);
+      background: #fff7df;
+      box-shadow: 0 0 0 5px rgba(197, 148, 66, .16), 0 18px 30px rgba(76, 61, 31, .16);
+      transform: scale(1.08);
+    }
+
+    .node.trace-month {
+      border-color: var(--red);
+    }
+
+    .node.trace-day {
+      border-color: var(--blue);
+    }
+
+    .node.trace-hour {
+      border-color: var(--green);
+    }
+
+    .node.active {
+      animation: pulse .74s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.11); }
+    }
+
+    .analysis-list {
+      display: grid;
+      gap: 10px;
+      padding: 16px 18px;
+    }
+
+    .analysis-card {
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--teal);
+      border-radius: 7px;
+      padding: 12px 12px 12px 13px;
+      background: rgba(255, 255, 255, .62);
+    }
+
+    .analysis-card:nth-child(2) { border-left-color: var(--blue); }
+    .analysis-card:nth-child(3) { border-left-color: var(--gold); }
+    .analysis-card:nth-child(4) { border-left-color: var(--red); }
+
+    .analysis-card b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .analysis-card p {
+      margin: 0;
+      color: #4d5b54;
+      line-height: 1.65;
+      font-size: 13px;
+    }
+
+    .process {
+      margin-top: auto;
+      padding: 14px 18px 18px;
+      border-top: 1px solid var(--line);
+      background: rgba(248, 242, 232, .72);
+    }
+
+    .process-actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .process-actions .btn {
+      height: 38px;
+      font-size: 13px;
+    }
+
+    .formula {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 11px;
+      background: #fffdf8;
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.65;
+    }
+
+    .steps {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 10px;
+      background: rgba(255, 255, 255, .58);
+      font-size: 13px;
+    }
+
+    .step strong {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--teal);
+    }
+
+    .step span {
+      color: #4f5c56;
+      line-height: 1.55;
+    }
+
+    .step em {
+      font-style: normal;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .knowledge {
+      margin-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .six-grid,
+    .advice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      padding: 16px 18px 18px;
+    }
+
+    .six-item,
+    .advice-item {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 12px;
+      background: rgba(255, 255, 255, .64);
+    }
+
+    .six-item.current {
+      border-color: rgba(197, 148, 66, .78);
+      background: #fff7df;
+    }
+
+    .six-item b,
+    .advice-item b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .six-item p,
+    .advice-item p {
+      margin: 0;
+      color: #56635d;
+      line-height: 1.6;
+      font-size: 13px;
+    }
+
+    @media (max-width: 1180px) {
+      .shell {
+        grid-template-columns: 300px minmax(420px, 1fr);
+      }
+
+      .side-panel.right {
+        grid-column: 1 / -1;
+        min-height: 0;
+      }
+
+      .analysis-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .knowledge {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .app {
+        width: min(100% - 22px, 1440px);
+        padding-top: 12px;
+      }
+
+      .topbar,
+      .brand,
+      .stage-title {
+        align-items: flex-start;
+      }
+
+      .topbar,
+      .stage-title {
+        flex-direction: column;
+      }
+
+      .clock {
+        text-align: left;
+      }
+
+      .tagline {
+        white-space: normal;
+      }
+
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .side-panel,
+      .stage {
+        min-height: 0;
+      }
+
+      .palm-wrap {
+        min-height: 560px;
+      }
+
+      .analysis-list,
+      .six-grid,
+      .advice-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .palm-wrap {
+        min-height: 500px;
+      }
+
+      .palm-canvas {
+        width: min(98%, 420px);
+      }
+
+      .node {
+        width: 62px;
+        height: 62px;
+      }
+
+      .node b {
+        font-size: 14px;
+      }
+
+      .node small {
+        font-size: 10px;
+      }
+
+      .process-actions,
+      .button-row {
+        grid-template-columns: 1fr;
+      }
+
+      .step {
+        grid-template-columns: 38px 1fr;
+      }
+
+      .step em {
+        grid-column: 2;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">六</div>
+        <div>
+          <h1>小六壬掌诀排盘</h1>
+          <p class="tagline">即时取阴历月、日、时辰，按左手掌诀定位六神。</p>
+        </div>
+      </div>
+      <div class="clock" aria-live="polite">
+        <strong id="clockTime">--:--:--</strong>
+        <span id="clockZone">--</span>
+      </div>
+    </header>
+
+    <div class="shell">
+      <aside class="panel side-panel">
+        <section class="result-block" id="resultBlock">
+          <div class="result-label">
+            <span>当前结果</span>
+            <span id="resultIndex">--</span>
+          </div>
+          <div class="result-name" id="resultName">--</div>
+          <p class="result-brief" id="resultBrief">正在计算...</p>
+          <div class="chips" id="resultChips"></div>
+        </section>
+
+        <section>
+          <div class="panel-head">
+            <h2>排盘设置</h2>
+            <span>GitHub Pages 静态可用</span>
+          </div>
+          <div class="controls">
+            <div class="field">
+              <label for="mode">时间模式</label>
+              <select id="mode">
+                <option value="now">当前时间</option>
+                <option value="manual">指定时间</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="manualDate">指定时间</label>
+              <input id="manualDate" type="datetime-local">
+            </div>
+            <div class="field">
+              <label for="timeZone">时区</label>
+              <select id="timeZone"></select>
+            </div>
+            <div class="button-row">
+              <button class="btn" id="resetNow" type="button">回到此刻</button>
+              <button class="btn secondary" id="copyResult" type="button">复制结果</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="time-grid" aria-label="时间信息">
+          <div class="metric">
+            <span>公历时间</span>
+            <b id="solarText">--</b>
+          </div>
+          <div class="metric">
+            <span>阴历年月日</span>
+            <b id="lunarText">--</b>
+          </div>
+          <div class="metric">
+            <span>当时时辰</span>
+            <b id="hourText">--</b>
+          </div>
+          <div class="metric">
+            <span>取数</span>
+            <b id="numbersText">--</b>
+          </div>
+        </section>
+      </aside>
+
+      <section class="panel stage">
+        <div class="stage-title">
+          <div>
+            <h2>左手掌诀定位</h2>
+            <p>六点固定对应食指、中指、无名指的指尖与指根。点击播放后，月、日、时会依次沿六神循环落点。</p>
+          </div>
+          <div class="legend">
+            <span><i class="dot month"></i>月</span>
+            <span><i class="dot day"></i>日</span>
+            <span><i class="dot hour"></i>时</span>
+          </div>
+        </div>
+
+        <div class="palm-wrap">
+          <div class="palm-canvas" id="palmCanvas">
+            <img class="palm-img" src="assets/palm-left-generated.png" alt="左手掌心插画，拇指在左侧">
+            <div id="nodes"></div>
+          </div>
+        </div>
+
+        <section class="process">
+          <div class="process-actions">
+            <button class="btn" id="playProcess" type="button">播放过程</button>
+            <button class="btn secondary" id="stepProcess" type="button">单步查看</button>
+            <button class="btn secondary" id="clearProcess" type="button">只看结果</button>
+          </div>
+          <div class="formula" id="formula">--</div>
+          <div class="steps" id="steps"></div>
+        </section>
+      </section>
+
+      <aside class="panel side-panel right">
+        <div class="panel-head">
+          <h2>方向解析</h2>
+          <span id="toneText">--</span>
+        </div>
+        <div class="analysis-list" id="analysisList"></div>
+      </aside>
+    </div>
+
+    <section class="knowledge">
+      <article class="panel">
+        <div class="panel-head">
+          <h3>六神速览</h3>
+          <span>传统语义</span>
+        </div>
+        <div class="six-grid" id="sixGrid"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-head">
+          <h3>产品化建议</h3>
+          <span>下一步可迭代</span>
+        </div>
+        <div class="advice-grid">
+          <article class="advice-item">
+            <b>场景化入口</b>
+            <p>增加“问事类型”选择，如出行、合作、感情、求财，让解析更贴近用户问题。</p>
+          </article>
+          <article class="advice-item">
+            <b>历史记录</b>
+            <p>将最近排盘保存到本地浏览器，便于复盘同一问题在不同时间的变化。</p>
+          </article>
+          <article class="advice-item">
+            <b>分享卡片</b>
+            <p>生成一张包含时间、六神、简短建议的图片卡，方便移动端保存与分享。</p>
+          </article>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const SIX = [
+      {
+        name: "大安",
+        short: "静止、心安、吉祥",
+        tone: "稳中有吉，宜守正推进",
+        tags: ["安稳", "守成", "贵人近"],
+        color: "#0f7568",
+        life: "适合整理秩序、修复关系、放慢节奏。已有安排多能平稳落地，不宜突然变招。",
+        work: "按计划推进、复核细节、守住承诺。求快不如求稳，稳定输出会带来信任。",
+        wealth: "财务以保守为佳，可做预算、结算、回款跟进。大额冲动投入先缓一缓。",
+        feeling: "关系氛围平和，适合坦诚沟通与兑现小事。安全感来自持续行动。"
+      },
+      {
+        name: "留连",
+        short: "晦暗不明、拖延、纠缠",
+        tone: "事有牵绊，先理清再行动",
+        tags: ["迟滞", "反复", "未明"],
+        color: "#6a5aa8",
+        life: "容易被杂事牵住，适合清单化处理。先把未完成、未确认事项逐个收口。",
+        work: "项目可能卡在沟通、审批或边界不清。把责任人、截止时间、交付标准写清楚。",
+        wealth: "不宜急着付款或签约，尤其注意隐藏成本、口头承诺和延期风险。",
+        feeling: "易有误会或旧事反复。少猜，多问清楚；给彼此一点消化时间。"
+      },
+      {
+        name: "速喜",
+        short: "快速、喜庆、时机已到",
+        tone: "机会已近，宜快速响应",
+        tags: ["消息", "行动", "喜事"],
+        color: "#c59442",
+        life: "适合约见、出行、提交申请、推进等待中的事。好消息常来自主动跟进。",
+        work: "窗口期较好，适合发起沟通、提案、面试或发布成果。节奏快，但别漏关键条件。",
+        wealth: "短线机会增加，可关注回款、优惠、成交信号。仍需确认凭证与到账时间。",
+        feeling: "互动升温较快，适合表达善意、安排见面。积极但不过度催促，效果更好。"
+      },
+      {
+        name: "赤口",
+        short: "惊恐、凶险、口舌是非",
+        tone: "慎言慎行，避开冲突点",
+        tags: ["口舌", "争执", "谨慎"],
+        color: "#c95e4b",
+        life: "当天容易因情绪、交通、细节造成摩擦。重要沟通先降温，避免硬碰硬。",
+        work: "会议、协商、客服和合同文字要格外小心。留下记录，避免凭印象争辩。",
+        wealth: "慎防纠纷、罚款、退换货或信息不对称。付款前核对对象、金额、条款。",
+        feeling: "易因一句话起波澜。先听完再回应，不在情绪高点做关系判断。"
+      },
+      {
+        name: "小吉",
+        short: "家、回归、好运将至",
+        tone: "小有顺遂，近处有助力",
+        tags: ["小成", "回归", "人和"],
+        color: "#2f86ba",
+        life: "适合处理家庭、住所、健康作息与熟人事务。小问题能找到温和解法。",
+        work: "适合团队配合、内部协调、补齐资料。贵人多在熟悉圈层或既有资源里。",
+        wealth: "偏向小额收益、稳定进账、旧资源再利用。别贪大，见好就收。",
+        feeling: "有回暖与靠近机会。适合制造轻松相处，而不是追问最终答案。"
+      },
+      {
+        name: "空亡",
+        short: "忧虑、不吉、无结果",
+        tone: "先止损蓄力，等待实信",
+        tags: ["虚耗", "落空", "静观"],
+        color: "#6f7b82",
+        life: "容易空转或期待落空，适合休整、复盘、删减无效安排。别把疲惫当预感。",
+        work: "新计划可能缺资源或缺确认。先做验证、备份和风险预案，暂缓重承诺。",
+        wealth: "不宜冒进投资或借贷担保。看不懂、查不实、催得急的事都先停。",
+        feeling: "回应可能不稳定，容易多想。把注意力收回自己，等对方给出明确行动。"
+      }
+    ];
+
+    const NODE_POS = [
+      { x: 43.0, y: 40.2, joint: "食指根部" },
+      { x: 39.4, y: 13.8, joint: "食指指尖" },
+      { x: 62.2, y: 8.5, joint: "中指指尖" },
+      { x: 82.0, y: 14.1, joint: "无名指指尖" },
+      { x: 80.1, y: 40.8, joint: "无名指根部" },
+      { x: 62.0, y: 39.8, joint: "中指根部" }
+    ];
+
+    const BRANCHES = [
+      { name: "子", value: 1, range: "23:00-00:59" },
+      { name: "丑", value: 2, range: "01:00-02:59" },
+      { name: "寅", value: 3, range: "03:00-04:59" },
+      { name: "卯", value: 4, range: "05:00-06:59" },
+      { name: "辰", value: 5, range: "07:00-08:59" },
+      { name: "巳", value: 6, range: "09:00-10:59" },
+      { name: "午", value: 7, range: "11:00-12:59" },
+      { name: "未", value: 8, range: "13:00-14:59" },
+      { name: "申", value: 9, range: "15:00-16:59" },
+      { name: "酉", value: 10, range: "17:00-18:59" },
+      { name: "戌", value: 11, range: "19:00-20:59" },
+      { name: "亥", value: 12, range: "21:00-22:59" }
+    ];
+
+    const MONTH_MAP = {
+      "正月": 1, "一月": 1, "二月": 2, "三月": 3, "四月": 4, "五月": 5, "六月": 6,
+      "七月": 7, "八月": 8, "九月": 9, "十月": 10, "十一月": 11, "冬月": 11, "腊月": 12, "十二月": 12
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const state = { trace: [], animationTimer: null, stepCursor: 0, latest: null };
+
+    function pad(value) {
+      return String(value).padStart(2, "0");
+    }
+
+    function inputValue(date) {
+      return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    function initZones() {
+      const local = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Shanghai";
+      const zones = Array.from(new Set(["Asia/Shanghai", local, "Asia/Taipei", "Asia/Hong_Kong", "Asia/Singapore", "UTC"]));
+      $("timeZone").innerHTML = zones.map((zone) => `<option value="${zone}">${zone}</option>`).join("");
+      $("timeZone").value = "Asia/Shanghai";
+      $("manualDate").value = inputValue(new Date());
+      $("manualDate").disabled = true;
+    }
+
+    function buildStatic() {
+      $("nodes").innerHTML = SIX.map((item, index) => {
+        const pos = NODE_POS[index];
+        return `
+          <button class="node" id="node-${index}" type="button" style="--x:${pos.x}%;--y:${pos.y}%;" title="${item.name}：${pos.joint}">
+            <b>${item.name}</b>
+            <small>${pos.joint}</small>
+          </button>
+        `;
+      }).join("");
+
+      $("sixGrid").innerHTML = SIX.map((item, index) => `
+        <article class="six-item" id="six-${index}">
+          <b>${index + 1}. ${item.name}</b>
+          <p>${item.short}</p>
+        </article>
+      `).join("");
+    }
+
+    function getDate() {
+      return $("mode").value === "manual" && $("manualDate").value
+        ? new Date($("manualDate").value)
+        : new Date();
+    }
+
+    function zonedParts(date, timeZone) {
+      const parts = new Intl.DateTimeFormat("zh-CN", {
+        timeZone,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        weekday: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hourCycle: "h23"
+      }).formatToParts(date);
+      return Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
+    }
+
+    function lunarParts(date, timeZone) {
+      const parts = new Intl.DateTimeFormat("zh-CN-u-ca-chinese", {
+        timeZone,
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      }).formatToParts(date);
+      const values = Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
+      const monthName = values.month || "";
+      const monthNumber = MONTH_MAP[monthName.replace(/^闰/, "")] || Number(monthName.replace(/\D/g, ""));
+      const dayNumber = Number(values.day);
+      return {
+        text: `${values.yearName || ""}年${monthName}${dayNumber}`,
+        monthName,
+        monthNumber,
+        dayNumber,
+        isLeap: monthName.startsWith("闰")
+      };
+    }
+
+    function branchFromHour(hour) {
+      if (hour === 23 || hour === 0) return BRANCHES[0];
+      return BRANCHES[Math.floor((hour + 1) / 2)];
+    }
+
+    function modSix(value) {
+      const remainder = value % 6;
+      return remainder === 0 ? 6 : remainder;
+    }
+
+    function walk(startIndex, count, type) {
+      const points = [];
+      let index = startIndex;
+      for (let cursor = 1; cursor <= count; cursor += 1) {
+        points.push({ index, cursor, type });
+        if (cursor < count) index = (index + 1) % 6;
+      }
+      return { endIndex: index, points };
+    }
+
+    function calculate() {
+      const timeZone = $("timeZone").value;
+      const date = getDate();
+      const solar = zonedParts(date, timeZone);
+      const lunar = lunarParts(date, timeZone);
+      const branch = branchFromHour(Number(solar.hour));
+      const monthWalk = walk(0, lunar.monthNumber, "month");
+      const dayWalk = walk(monthWalk.endIndex, lunar.dayNumber, "day");
+      const hourWalk = walk(dayWalk.endIndex, branch.value, "hour");
+      const formulaValue = lunar.monthNumber + lunar.dayNumber + branch.value - 2;
+      return {
+        timeZone,
+        solar,
+        lunar,
+        branch,
+        resultIndex: hourWalk.endIndex,
+        formulaValue,
+        formulaResult: modSix(formulaValue),
+        walks: [monthWalk, dayWalk, hourWalk],
+        trace: [...monthWalk.points, ...dayWalk.points, ...hourWalk.points]
+      };
+    }
+
+    function renderTrace(points, resultIndex) {
+      document.querySelectorAll(".node").forEach((node) => {
+        node.classList.remove("result", "active", "trace-month", "trace-day", "trace-hour");
+      });
+      points.forEach((point) => {
+        const node = $(`node-${point.index}`);
+        if (node) node.classList.add(`trace-${point.type}`);
+      });
+      const last = points[points.length - 1];
+      if (last && $(`node-${last.index}`)) $(`node-${last.index}`).classList.add("active");
+      if ($(`node-${resultIndex}`)) $(`node-${resultIndex}`).classList.add("result");
+    }
+
+    function render(result) {
+      const item = SIX[result.resultIndex];
+      state.latest = result;
+      state.trace = result.trace;
+
+      $("clockTime").textContent = `${result.solar.hour}:${result.solar.minute}:${result.solar.second}`;
+      $("clockZone").textContent = `${result.timeZone} · ${result.solar.weekday}`;
+      $("resultIndex").textContent = `第 ${result.resultIndex + 1} 位`;
+      $("resultName").textContent = item.name;
+      $("resultBrief").textContent = item.short;
+      $("resultBlock").style.background = `linear-gradient(155deg, ${item.color}, #102522)`;
+      $("resultChips").innerHTML = item.tags.map((tag) => `<span class="chip">${tag}</span>`).join("");
+
+      $("solarText").textContent = `${result.solar.year}-${result.solar.month}-${result.solar.day} ${result.solar.hour}:${result.solar.minute}`;
+      $("lunarText").textContent = `${result.lunar.text}${result.lunar.isLeap ? "（闰月）" : ""}`;
+      $("hourText").textContent = `${result.branch.name}时 · 第${result.branch.value}位 · ${result.branch.range}`;
+      $("numbersText").textContent = `${result.lunar.monthNumber}月 + ${result.lunar.dayNumber}日 + ${result.branch.value}时`;
+      $("toneText").textContent = item.tone;
+
+      $("analysisList").innerHTML = [
+        ["生活", item.life],
+        ["工作", item.work],
+        ["财运", item.wealth],
+        ["感情", item.feeling]
+      ].map(([title, text]) => `
+        <article class="analysis-card">
+          <b>${title}</b>
+          <p>${text}</p>
+        </article>
+      `).join("");
+
+      $("formula").innerHTML = `公式：(${result.lunar.monthNumber} + ${result.lunar.dayNumber} + ${result.branch.value}) - 2 = ${result.formulaValue}；${result.formulaValue} ÷ 6 取余 ${result.formulaResult}，对应 <span style="color:${item.color}">${item.name}</span>`;
+      $("steps").innerHTML = [
+        ["月", `从大安起数阴历${result.lunar.monthName}，落在${SIX[result.walks[0].endIndex].name}。`, SIX[result.walks[0].endIndex].name],
+        ["日", `以上一步为第 1 位继续数${result.lunar.dayNumber}日，落在${SIX[result.walks[1].endIndex].name}。`, SIX[result.walks[1].endIndex].name],
+        ["时", `以日落点为第 1 位继续数${result.branch.name}时第 ${result.branch.value} 位。`, SIX[result.walks[2].endIndex].name]
+      ].map(([label, text, end]) => `
+        <div class="step">
+          <strong>${label}</strong>
+          <span>${text}</span>
+          <em>${end}</em>
+        </div>
+      `).join("");
+
+      SIX.forEach((_, index) => $(`six-${index}`)?.classList.toggle("current", index === result.resultIndex));
+      renderTrace([{ index: result.resultIndex, type: "hour" }], result.resultIndex);
+    }
+
+    function update() {
+      render(calculate());
+    }
+
+    function playTrace(singleStep = false) {
+      window.clearInterval(state.animationTimer);
+      const result = calculate();
+      state.latest = result;
+      state.trace = result.trace;
+      if (!singleStep) state.stepCursor = 0;
+
+      const draw = () => {
+        const partial = state.trace.slice(0, state.stepCursor + 1);
+        renderTrace(partial, result.resultIndex);
+        state.stepCursor += 1;
+        if (state.stepCursor >= state.trace.length) {
+          window.clearInterval(state.animationTimer);
+          state.stepCursor = 0;
+        }
+      };
+
+      draw();
+      if (!singleStep) state.animationTimer = window.setInterval(draw, 170);
+    }
+
+    async function copyResult() {
+      const result = state.latest || calculate();
+      const item = SIX[result.resultIndex];
+      const text = `小六壬：${item.name}\n公历：${result.solar.year}-${result.solar.month}-${result.solar.day} ${result.solar.hour}:${result.solar.minute}\n阴历：${result.lunar.text}\n时辰：${result.branch.name}时\n取数：${result.lunar.monthNumber}+${result.lunar.dayNumber}+${result.branch.value}-2=${result.formulaValue}\n解析：${item.short}`;
+      try {
+        await navigator.clipboard.writeText(text);
+        $("copyResult").textContent = "已复制";
+        window.setTimeout(() => $("copyResult").textContent = "复制结果", 1300);
+      } catch {
+        $("copyResult").textContent = "复制失败";
+        window.setTimeout(() => $("copyResult").textContent = "复制结果", 1300);
+      }
+    }
+
+    initZones();
+    buildStatic();
+    update();
+
+    window.setInterval(() => {
+      if ($("mode").value === "now") update();
+    }, 1000);
+
+    $("mode").addEventListener("change", () => {
+      $("manualDate").disabled = $("mode").value === "now";
+      update();
+    });
+    $("manualDate").addEventListener("change", () => {
+      $("mode").value = "manual";
+      $("manualDate").disabled = false;
+      update();
+    });
+    $("timeZone").addEventListener("change", update);
+    $("resetNow").addEventListener("click", () => {
+      $("mode").value = "now";
+      $("manualDate").value = inputValue(new Date());
+      $("manualDate").disabled = true;
+      update();
+    });
+    $("copyResult").addEventListener("click", copyResult);
+    $("playProcess").addEventListener("click", () => playTrace(false));
+    $("stepProcess").addEventListener("click", () => playTrace(true));
+    $("clearProcess").addEventListener("click", () => {
+      window.clearInterval(state.animationTimer);
+      state.stepCursor = 0;
+      const result = calculate();
+      renderTrace([{ index: result.resultIndex, type: "hour" }], result.resultIndex);
+    });
+  </script>
+</body>
+</html>
