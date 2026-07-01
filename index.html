@@ -198,7 +198,7 @@
 
     .button-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
       margin-top: 2px;
     }
@@ -221,6 +221,12 @@
 
     .btn:hover {
       transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      opacity: .46;
+      transform: none;
     }
 
     .result-block {
@@ -391,6 +397,10 @@
       pointer-events: none;
     }
 
+    .palm-canvas picture {
+      display: contents;
+    }
+
     .node {
       position: absolute;
       left: var(--x);
@@ -410,6 +420,16 @@
       box-shadow: 0 10px 24px rgba(33, 43, 39, .12);
       transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
       isolation: isolate;
+    }
+
+    .calibration-mode .node {
+      cursor: grab;
+      outline: 2px dashed rgba(15, 117, 104, .35);
+      outline-offset: 4px;
+    }
+
+    .calibration-mode .node:active {
+      cursor: grabbing;
     }
 
     .node b {
@@ -540,6 +560,12 @@
       background: rgba(255, 255, 255, .62);
     }
 
+    .analysis-card.focus {
+      background: #fff7df;
+      border-color: rgba(197, 148, 66, .72);
+      box-shadow: inset 0 0 0 1px rgba(197, 148, 66, .12);
+    }
+
     .analysis-card:nth-child(2) { border-left-color: var(--blue); }
     .analysis-card:nth-child(3) { border-left-color: var(--gold); }
     .analysis-card:nth-child(4) { border-left-color: var(--red); }
@@ -585,6 +611,122 @@
       color: var(--ink);
       background: #fffdf8;
       font-weight: 800;
+    }
+
+    .details-box,
+    .calibration-panel,
+    .history-panel,
+    .notice {
+      border-top: 1px solid var(--line);
+      padding: 14px 18px 18px;
+      background: rgba(248, 242, 232, .6);
+    }
+
+    .details-box details {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, .62);
+    }
+
+    .details-box summary {
+      cursor: pointer;
+      padding: 11px 12px;
+      font-weight: 900;
+    }
+
+    .details-box .rule-body {
+      padding: 0 12px 12px;
+      color: #4f5c56;
+      line-height: 1.7;
+      font-size: 13px;
+    }
+
+    .calibration-panel {
+      display: none;
+      gap: 10px;
+    }
+
+    .calibration-panel.open {
+      display: grid;
+    }
+
+    .calibration-panel p,
+    .notice p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 13px;
+    }
+
+    .calibration-actions,
+    .history-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .mini-btn {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 0 10px;
+      color: var(--ink);
+      background: #fffdf8;
+      font-weight: 900;
+      font-size: 12px;
+    }
+
+    .coord-output {
+      width: 100%;
+      min-height: 90px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 10px;
+      color: #35423d;
+      background: #fffdf8;
+      font: 12px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .history-panel {
+      display: grid;
+      gap: 10px;
+    }
+
+    .history-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .history-item {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 10px;
+      background: rgba(255, 255, 255, .62);
+    }
+
+    .history-item b {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 5px;
+      font-size: 13px;
+    }
+
+    .history-item span,
+    .history-empty {
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 12px;
+    }
+
+    .notice {
+      color: var(--muted);
+      margin-top: 16px;
+    }
+
+    .notice strong {
+      color: var(--ink);
     }
 
     .phase-status {
@@ -757,6 +899,12 @@
         min-height: 0;
       }
 
+      .result-block {
+        position: sticky;
+        top: 8px;
+        z-index: 5;
+      }
+
       .palm-wrap {
         min-height: 560px;
       }
@@ -854,9 +1002,22 @@
               <label for="timeZone">时区</label>
               <select id="timeZone"></select>
             </div>
+            <div class="field">
+              <label for="questionType">问事类型</label>
+              <select id="questionType">
+                <option value="general">综合查看</option>
+                <option value="life">生活</option>
+                <option value="work">工作</option>
+                <option value="wealth">财运</option>
+                <option value="feeling">感情</option>
+              </select>
+            </div>
             <div class="button-row">
               <button class="btn" id="resetNow" type="button">回到此刻</button>
               <button class="btn secondary" id="copyResult" type="button">复制结果</button>
+              <button class="btn secondary" id="saveHistory" type="button">保存记录</button>
+              <button class="btn secondary" id="shareCard" type="button">分享卡片</button>
+              <button class="btn secondary" id="toggleCalibration" type="button">校准点位</button>
             </div>
           </div>
         </section>
@@ -879,6 +1040,14 @@
             <b id="numbersText">--</b>
           </div>
         </section>
+
+        <section class="history-panel">
+          <div class="panel-head" style="padding:0;border:0;">
+            <h2>历史记录</h2>
+            <button class="mini-btn" id="clearHistory" type="button">清空</button>
+          </div>
+          <div class="history-list" id="historyList"></div>
+        </section>
       </aside>
 
       <section class="panel stage">
@@ -896,7 +1065,10 @@
 
         <div class="palm-wrap">
           <div class="palm-canvas" id="palmCanvas">
-            <img class="palm-img" src="assets/palm-left-generated.png" alt="左手掌心插画，拇指在左侧">
+            <picture>
+              <source srcset="assets/palm-left-generated.webp" type="image/webp">
+              <img class="palm-img" src="assets/palm-left-generated.png" alt="左手掌心插画，拇指在左侧">
+            </picture>
             <div id="nodes"></div>
           </div>
         </div>
@@ -917,6 +1089,26 @@
           </div>
           <div class="formula" id="formula">--</div>
           <div class="steps" id="steps"></div>
+        </section>
+
+        <section class="details-box">
+          <details>
+            <summary>算法说明与时辰表</summary>
+            <div class="rule-body">
+              <p>小六壬按六神顺序循环：大安、留连、速喜、赤口、小吉、空亡。月从大安起数；日从月的落点作为第 1 位继续数；时从日的落点作为第 1 位继续数。因此等价公式为：(月 + 日 + 时) - 2，再对 6 取余。</p>
+              <p>时辰取数：子 1、丑 2、寅 3、卯 4、辰 5、巳 6、午 7、未 8、申 9、酉 10、戌 11、亥 12。</p>
+            </div>
+          </details>
+        </section>
+
+        <section class="calibration-panel" id="calibrationPanel">
+          <p>校准模式下可拖动六个掌诀点。坐标会保存到本机浏览器；复制 JSON 后也可直接写回代码里的默认坐标。</p>
+          <div class="calibration-actions">
+            <button class="mini-btn" id="saveCalibration" type="button">保存坐标</button>
+            <button class="mini-btn" id="resetCalibration" type="button">恢复默认</button>
+            <button class="mini-btn" id="copyCalibration" type="button">复制 JSON</button>
+          </div>
+          <textarea class="coord-output" id="coordOutput" readonly></textarea>
         </section>
       </section>
 
@@ -958,6 +1150,10 @@
           </article>
         </div>
       </article>
+    </section>
+
+    <section class="notice panel">
+      <p><strong>提示：</strong>小六壬结果适合用于参考、自省和整理思路，不应替代医疗、法律、投资或其他现实高风险决策。</p>
     </section>
   </main>
 
@@ -1031,7 +1227,7 @@
       }
     ];
 
-    const NODE_POS = [
+    const DEFAULT_NODE_POS = [
       { x: 42.8, y: 36.0, joint: "食指根部" },
       { x: 39.7, y: 10.8, joint: "食指指尖" },
       { x: 56.8, y: 6.8, joint: "中指指尖" },
@@ -1068,8 +1264,27 @@
       "UTC": "协调世界时（UTC）"
     };
 
+    const DOMAIN_LABELS = {
+      general: "综合",
+      life: "生活",
+      work: "工作",
+      wealth: "财运",
+      feeling: "感情"
+    };
+
     const $ = (id) => document.getElementById(id);
-    const state = { trace: [], animationTimer: null, restoreTimer: null, stepCursor: 0, latest: null, isPlaying: false, defaultResultIndex: null };
+    let nodePositions = loadNodePositions();
+    const state = {
+      trace: [],
+      animationTimer: null,
+      restoreTimer: null,
+      stepCursor: 0,
+      latest: null,
+      isPlaying: false,
+      defaultResultIndex: null,
+      calibrationMode: false,
+      draggingNode: null
+    };
     const PHASE_META = {
       month: { label: "月", color: "var(--red)", hint: "从大安起数阴历月" },
       day: { label: "日", color: "var(--blue)", hint: "从月落点接续数阴历日" },
@@ -1082,6 +1297,22 @@
 
     function inputValue(date) {
       return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    function loadNodePositions() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("xlrNodePositions") || "null");
+        if (Array.isArray(saved) && saved.length === DEFAULT_NODE_POS.length) {
+          return saved.map((item, index) => ({
+            x: Number(item.x) || DEFAULT_NODE_POS[index].x,
+            y: Number(item.y) || DEFAULT_NODE_POS[index].y,
+            joint: DEFAULT_NODE_POS[index].joint
+          }));
+        }
+      } catch {
+        localStorage.removeItem("xlrNodePositions");
+      }
+      return DEFAULT_NODE_POS.map((item) => ({ ...item }));
     }
 
     function initZones() {
@@ -1098,9 +1329,9 @@
 
     function buildStatic() {
       $("nodes").innerHTML = SIX.map((item, index) => {
-        const pos = NODE_POS[index];
+        const pos = nodePositions[index];
         return `
-          <button class="node" id="node-${index}" type="button" style="--x:${pos.x}%;--y:${pos.y}%;" title="${item.name}：${pos.joint}">
+          <button class="node" id="node-${index}" data-index="${index}" type="button" style="--x:${pos.x}%;--y:${pos.y}%;" title="${item.name}：${pos.joint}">
             <b>${item.name}</b>
             <small>${pos.joint}</small>
           </button>
@@ -1113,6 +1344,91 @@
           <p>${item.short}</p>
         </article>
       `).join("");
+      bindCalibrationDrag();
+      updateCoordOutput();
+    }
+
+    function updateNodeStyles() {
+      nodePositions.forEach((pos, index) => {
+        const node = $(`node-${index}`);
+        if (!node) return;
+        node.style.setProperty("--x", `${pos.x}%`);
+        node.style.setProperty("--y", `${pos.y}%`);
+        node.title = `${SIX[index].name}：${pos.joint}`;
+      });
+      updateCoordOutput();
+    }
+
+    function updateCoordOutput() {
+      const output = $("coordOutput");
+      if (!output) return;
+      output.value = JSON.stringify(nodePositions.map(({ x, y, joint }) => ({
+        x: Number(x.toFixed(2)),
+        y: Number(y.toFixed(2)),
+        joint
+      })), null, 2);
+    }
+
+    function bindCalibrationDrag() {
+      document.querySelectorAll(".node").forEach((node) => {
+        node.addEventListener("pointerdown", (event) => {
+          if (!state.calibrationMode) return;
+          event.preventDefault();
+          node.setPointerCapture(event.pointerId);
+          state.draggingNode = Number(node.dataset.index);
+        });
+        node.addEventListener("pointermove", (event) => {
+          if (!state.calibrationMode || state.draggingNode === null) return;
+          const canvas = $("palmCanvas");
+          const rect = canvas.getBoundingClientRect();
+          const x = Math.min(96, Math.max(4, ((event.clientX - rect.left) / rect.width) * 100));
+          const y = Math.min(96, Math.max(4, ((event.clientY - rect.top) / rect.height) * 100));
+          nodePositions[state.draggingNode] = {
+            ...nodePositions[state.draggingNode],
+            x,
+            y
+          };
+          updateNodeStyles();
+        });
+        node.addEventListener("pointerup", () => {
+          state.draggingNode = null;
+        });
+        node.addEventListener("pointercancel", () => {
+          state.draggingNode = null;
+        });
+      });
+    }
+
+    function toggleCalibration() {
+      state.calibrationMode = !state.calibrationMode;
+      $("palmCanvas").classList.toggle("calibration-mode", state.calibrationMode);
+      $("calibrationPanel").classList.toggle("open", state.calibrationMode);
+      $("toggleCalibration").textContent = state.calibrationMode ? "退出校准" : "校准点位";
+      updateCoordOutput();
+    }
+
+    function saveCalibration() {
+      localStorage.setItem("xlrNodePositions", JSON.stringify(nodePositions));
+      $("saveCalibration").textContent = "已保存";
+      window.setTimeout(() => $("saveCalibration").textContent = "保存坐标", 1200);
+    }
+
+    function resetCalibration() {
+      nodePositions = DEFAULT_NODE_POS.map((item) => ({ ...item }));
+      localStorage.removeItem("xlrNodePositions");
+      updateNodeStyles();
+      renderDefaultState(state.latest || calculate());
+    }
+
+    async function copyCalibration() {
+      try {
+        await navigator.clipboard.writeText($("coordOutput").value);
+        $("copyCalibration").textContent = "已复制";
+        window.setTimeout(() => $("copyCalibration").textContent = "复制 JSON", 1200);
+      } catch {
+        $("copyCalibration").textContent = "复制失败";
+        window.setTimeout(() => $("copyCalibration").textContent = "复制 JSON", 1200);
+      }
     }
 
     function getDate() {
@@ -1296,13 +1612,20 @@
       $("numbersText").textContent = `${result.lunar.monthNumber}月 + ${result.lunar.dayNumber}日 + ${result.branch.value}时`;
       $("toneText").textContent = item.tone;
 
-      $("analysisList").innerHTML = [
-        ["生活", item.life],
-        ["工作", item.work],
-        ["财运", item.wealth],
-        ["感情", item.feeling]
-      ].map(([title, text]) => `
-        <article class="analysis-card">
+      const focusType = $("questionType").value;
+      const domains = [
+        ["life", "生活", item.life],
+        ["work", "工作", item.work],
+        ["wealth", "财运", item.wealth],
+        ["feeling", "感情", item.feeling]
+      ].sort(([typeA], [typeB]) => {
+        if (focusType === "general") return 0;
+        if (typeA === focusType) return -1;
+        if (typeB === focusType) return 1;
+        return 0;
+      });
+      $("analysisList").innerHTML = domains.map(([type, title, text]) => `
+        <article class="analysis-card ${type === focusType ? "focus" : ""}">
           <b>${title}</b>
           <p>${text}</p>
         </article>
@@ -1385,6 +1708,155 @@
       }
     }
 
+    function resultSummary(result = state.latest || calculate()) {
+      const item = SIX[result.resultIndex];
+      const questionType = $("questionType").value;
+      return {
+        savedAt: new Date().toISOString(),
+        resultName: item.name,
+        short: item.short,
+        tone: item.tone,
+        questionType,
+        questionLabel: DOMAIN_LABELS[questionType],
+        solar: `${result.solar.year}-${result.solar.month}-${result.solar.day} ${result.solar.hour}:${result.solar.minute}`,
+        lunar: result.lunar.text,
+        branch: `${result.branch.name}时`,
+        formula: `${result.lunar.monthNumber}+${result.lunar.dayNumber}+${result.branch.value}-2=${result.formulaValue}`
+      };
+    }
+
+    function loadHistory() {
+      try {
+        const history = JSON.parse(localStorage.getItem("xlrHistory") || "[]");
+        return Array.isArray(history) ? history : [];
+      } catch {
+        localStorage.removeItem("xlrHistory");
+        return [];
+      }
+    }
+
+    function renderHistory() {
+      const history = loadHistory();
+      if (!history.length) {
+        $("historyList").innerHTML = `<div class="history-empty">暂无记录。点击“保存记录”后会保存在当前浏览器。</div>`;
+        return;
+      }
+      $("historyList").innerHTML = history.map((entry) => `
+        <article class="history-item">
+          <b><span>${entry.resultName} · ${entry.questionLabel || "综合"}</span><span>${entry.branch}</span></b>
+          <span>${entry.lunar} / ${entry.solar}</span>
+        </article>
+      `).join("");
+    }
+
+    function saveHistory() {
+      const history = loadHistory();
+      history.unshift(resultSummary());
+      localStorage.setItem("xlrHistory", JSON.stringify(history.slice(0, 10)));
+      renderHistory();
+      $("saveHistory").textContent = "已保存";
+      window.setTimeout(() => $("saveHistory").textContent = "保存记录", 1200);
+    }
+
+    function clearHistory() {
+      localStorage.removeItem("xlrHistory");
+      renderHistory();
+    }
+
+    function roundRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight) {
+      const words = Array.from(text);
+      let line = "";
+      let cursorY = y;
+      words.forEach((char) => {
+        const test = line + char;
+        if (ctx.measureText(test).width > maxWidth && line) {
+          ctx.fillText(line, x, cursorY);
+          line = char;
+          cursorY += lineHeight;
+        } else {
+          line = test;
+        }
+      });
+      if (line) ctx.fillText(line, x, cursorY);
+      return cursorY + lineHeight;
+    }
+
+    function shareCard() {
+      const result = state.latest || calculate();
+      const item = SIX[result.resultIndex];
+      const summary = resultSummary(result);
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1440;
+      const ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = "#f4efe6";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const gradient = ctx.createLinearGradient(0, 0, 1080, 1440);
+      gradient.addColorStop(0, "#fffaf1");
+      gradient.addColorStop(1, "#e8f2ed");
+      ctx.fillStyle = gradient;
+      roundRect(ctx, 70, 70, 940, 1300, 34);
+      ctx.fill();
+
+      ctx.fillStyle = item.color;
+      roundRect(ctx, 110, 120, 860, 360, 26);
+      ctx.fill();
+      ctx.fillStyle = "rgba(255,255,255,.82)";
+      ctx.font = "700 34px Microsoft YaHei, sans-serif";
+      ctx.fillText("小六壬掌诀排盘", 150, 185);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "900 132px Microsoft YaHei, sans-serif";
+      ctx.fillText(item.name, 150, 330);
+      ctx.font = "600 34px Microsoft YaHei, sans-serif";
+      ctx.fillText(item.short, 150, 405);
+
+      ctx.fillStyle = "#182521";
+      ctx.font = "800 42px Microsoft YaHei, sans-serif";
+      ctx.fillText(`${summary.questionLabel}建议`, 130, 570);
+      ctx.font = "500 34px Microsoft YaHei, sans-serif";
+      ctx.fillStyle = "#4d5b54";
+      const domainText = summary.questionType === "general"
+        ? `${item.tone}。${item.life}`
+        : item[summary.questionType];
+      const nextY = wrapCanvasText(ctx, domainText, 130, 635, 820, 52);
+
+      ctx.fillStyle = "#182521";
+      ctx.font = "800 34px Microsoft YaHei, sans-serif";
+      ctx.fillText("排盘信息", 130, nextY + 50);
+      ctx.fillStyle = "#4d5b54";
+      ctx.font = "500 30px Microsoft YaHei, sans-serif";
+      [
+        `公历：${summary.solar}`,
+        `阴历：${summary.lunar}`,
+        `时辰：${summary.branch}`,
+        `取数：${summary.formula}`
+      ].forEach((line, index) => ctx.fillText(line, 130, nextY + 105 + index * 48));
+
+      ctx.fillStyle = "#69766f";
+      ctx.font = "500 24px Microsoft YaHei, sans-serif";
+      wrapCanvasText(ctx, "仅供参考与自省，不替代现实高风险决策。", 130, 1300, 820, 34);
+
+      const link = document.createElement("a");
+      link.download = `小六壬-${item.name}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    }
+
     initZones();
     buildStatic();
     update();
@@ -1403,6 +1875,7 @@
       update();
     });
     $("timeZone").addEventListener("change", update);
+    $("questionType").addEventListener("change", update);
     $("resetNow").addEventListener("click", () => {
       $("mode").value = "now";
       $("manualDate").value = inputValue(new Date());
@@ -1410,9 +1883,17 @@
       update();
     });
     $("copyResult").addEventListener("click", copyResult);
+    $("saveHistory").addEventListener("click", saveHistory);
+    $("shareCard").addEventListener("click", shareCard);
+    $("clearHistory").addEventListener("click", clearHistory);
+    $("toggleCalibration").addEventListener("click", toggleCalibration);
+    $("saveCalibration").addEventListener("click", saveCalibration);
+    $("resetCalibration").addEventListener("click", resetCalibration);
+    $("copyCalibration").addEventListener("click", copyCalibration);
     $("playProcess").addEventListener("click", playTrace);
     $("stopProcess").addEventListener("click", stopTrace);
     setPlaybackControls(false);
+    renderHistory();
   </script>
 </body>
 </html>
