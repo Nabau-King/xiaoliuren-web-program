@@ -395,8 +395,8 @@
       position: absolute;
       left: var(--x);
       top: var(--y);
-      width: 76px;
-      height: 76px;
+      width: 68px;
+      height: 68px;
       translate: -50% -50%;
       border: 2px solid rgba(24, 37, 33, .14);
       border-radius: 50%;
@@ -414,17 +414,35 @@
 
     .node b {
       display: block;
-      font-size: 17px;
+      font-size: 15px;
       line-height: 1;
       font-weight: 950;
+      position: relative;
+      z-index: 1;
     }
 
     .node small {
       display: block;
       margin-top: 4px;
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 900;
+      position: relative;
+      z-index: 1;
+    }
+
+    .node::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 3px rgba(197, 148, 66, .18);
+      transform: translate(-50%, -50%);
+      z-index: 0;
     }
 
     .node::after {
@@ -440,7 +458,7 @@
       border-color: var(--gold);
       background: #fff7df;
       box-shadow: 0 0 0 5px rgba(197, 148, 66, .16), 0 18px 30px rgba(76, 61, 31, .16);
-      transform: scale(1.08);
+      animation: resultPulse 1.05s ease-in-out infinite alternate;
     }
 
     .node.trace-month {
@@ -455,6 +473,39 @@
       border-color: var(--green);
     }
 
+    .node.active-month {
+      border-color: var(--red);
+      background: #fff0ea;
+      box-shadow: 0 0 0 5px rgba(201, 94, 75, .16), 0 18px 30px rgba(76, 37, 31, .14);
+    }
+
+    .node.active-day {
+      border-color: var(--blue);
+      background: #eef8ff;
+      box-shadow: 0 0 0 5px rgba(47, 134, 186, .15), 0 18px 30px rgba(31, 60, 76, .13);
+    }
+
+    .node.active-hour {
+      border-color: var(--green);
+      background: #ecfff7;
+      box-shadow: 0 0 0 5px rgba(35, 149, 109, .15), 0 18px 30px rgba(29, 76, 55, .13);
+    }
+
+    .node.active-month::before {
+      background: var(--red);
+      box-shadow: 0 0 0 3px rgba(201, 94, 75, .2);
+    }
+
+    .node.active-day::before {
+      background: var(--blue);
+      box-shadow: 0 0 0 3px rgba(47, 134, 186, .2);
+    }
+
+    .node.active-hour::before {
+      background: var(--green);
+      box-shadow: 0 0 0 3px rgba(35, 149, 109, .2);
+    }
+
     .node.active {
       animation: pulse .74s ease-in-out infinite alternate;
     }
@@ -462,6 +513,17 @@
     @keyframes pulse {
       from { transform: scale(1); }
       to { transform: scale(1.11); }
+    }
+
+    @keyframes resultPulse {
+      from {
+        transform: scale(1);
+        box-shadow: 0 0 0 4px rgba(197, 148, 66, .12), 0 16px 26px rgba(76, 61, 31, .12);
+      }
+      to {
+        transform: scale(1.09);
+        box-shadow: 0 0 0 8px rgba(197, 148, 66, .2), 0 20px 34px rgba(76, 61, 31, .18);
+      }
     }
 
     .analysis-list {
@@ -504,14 +566,50 @@
 
     .process-actions {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 8px;
       margin-bottom: 12px;
     }
 
-    .process-actions .btn {
+    .process-actions .btn,
+    .process-actions select {
       height: 38px;
       font-size: 13px;
+    }
+
+    .process-actions select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 0 9px;
+      color: var(--ink);
+      background: #fffdf8;
+      font-weight: 800;
+    }
+
+    .phase-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      border: 1px solid var(--line);
+      border-left: 5px solid var(--phase-color, var(--gold));
+      border-radius: 7px;
+      padding: 10px 11px;
+      background: rgba(255, 253, 248, .74);
+      transition: border-color .2s ease, background .2s ease;
+    }
+
+    .phase-status b {
+      font-size: 13px;
+    }
+
+    .phase-status span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-align: right;
     }
 
     .formula {
@@ -680,12 +778,12 @@
       }
 
       .node {
-        width: 62px;
-        height: 62px;
+        width: 58px;
+        height: 58px;
       }
 
       .node b {
-        font-size: 14px;
+        font-size: 13px;
       }
 
       .node small {
@@ -806,8 +904,16 @@
         <section class="process">
           <div class="process-actions">
             <button class="btn" id="playProcess" type="button">播放过程</button>
-            <button class="btn secondary" id="stepProcess" type="button">单步查看</button>
-            <button class="btn secondary" id="clearProcess" type="button">只看结果</button>
+            <button class="btn secondary" id="stopProcess" type="button" disabled>停止播放</button>
+            <select id="playSpeed" aria-label="播放速度">
+              <option value="900">慢速</option>
+              <option value="650" selected>标准</option>
+              <option value="380">快速</option>
+            </select>
+          </div>
+          <div class="phase-status" id="phaseStatus">
+            <b>当前阶段</b>
+            <span>只看最终落点</span>
           </div>
           <div class="formula" id="formula">--</div>
           <div class="steps" id="steps"></div>
@@ -926,12 +1032,12 @@
     ];
 
     const NODE_POS = [
-      { x: 43.0, y: 40.2, joint: "食指根部" },
-      { x: 39.4, y: 13.8, joint: "食指指尖" },
-      { x: 62.2, y: 8.5, joint: "中指指尖" },
-      { x: 82.0, y: 14.1, joint: "无名指指尖" },
-      { x: 80.1, y: 40.8, joint: "无名指根部" },
-      { x: 62.0, y: 39.8, joint: "中指根部" }
+      { x: 42.8, y: 36.0, joint: "食指根部" },
+      { x: 39.7, y: 10.8, joint: "食指指尖" },
+      { x: 56.8, y: 6.8, joint: "中指指尖" },
+      { x: 74.2, y: 11.0, joint: "无名指指尖" },
+      { x: 73.8, y: 36.8, joint: "无名指根部" },
+      { x: 57.0, y: 35.2, joint: "中指根部" }
     ];
 
     const BRANCHES = [
@@ -954,8 +1060,21 @@
       "七月": 7, "八月": 8, "九月": 9, "十月": 10, "十一月": 11, "冬月": 11, "腊月": 12, "十二月": 12
     };
 
+    const TIME_ZONE_LABELS = {
+      "Asia/Shanghai": "北京时间（中国标准时间 UTC+8）",
+      "Asia/Taipei": "台北时间（UTC+8）",
+      "Asia/Hong_Kong": "香港时间（UTC+8）",
+      "Asia/Singapore": "新加坡时间（UTC+8）",
+      "UTC": "协调世界时（UTC）"
+    };
+
     const $ = (id) => document.getElementById(id);
-    const state = { trace: [], animationTimer: null, stepCursor: 0, latest: null };
+    const state = { trace: [], animationTimer: null, restoreTimer: null, stepCursor: 0, latest: null, isPlaying: false, defaultResultIndex: null };
+    const PHASE_META = {
+      month: { label: "月", color: "var(--red)", hint: "从大安起数阴历月" },
+      day: { label: "日", color: "var(--blue)", hint: "从月落点接续数阴历日" },
+      hour: { label: "时", color: "var(--green)", hint: "从日落点接续数时辰" }
+    };
 
     function pad(value) {
       return String(value).padStart(2, "0");
@@ -968,7 +1087,10 @@
     function initZones() {
       const local = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Shanghai";
       const zones = Array.from(new Set(["Asia/Shanghai", local, "Asia/Taipei", "Asia/Hong_Kong", "Asia/Singapore", "UTC"]));
-      $("timeZone").innerHTML = zones.map((zone) => `<option value="${zone}">${zone}</option>`).join("");
+      $("timeZone").innerHTML = zones.map((zone) => {
+        const label = TIME_ZONE_LABELS[zone] || `本机时区（${zone}）`;
+        return `<option value="${zone}">${label}</option>`;
+      }).join("");
       $("timeZone").value = "Asia/Shanghai";
       $("manualDate").value = inputValue(new Date());
       $("manualDate").disabled = true;
@@ -1026,12 +1148,23 @@
       const monthNumber = MONTH_MAP[monthName.replace(/^闰/, "")] || Number(monthName.replace(/\D/g, ""));
       const dayNumber = Number(values.day);
       return {
-        text: `${values.yearName || ""}年${monthName}${dayNumber}`,
+        text: `${values.yearName || ""}年${monthName}${lunarDayText(dayNumber)}`,
         monthName,
         monthNumber,
         dayNumber,
         isLeap: monthName.startsWith("闰")
       };
+    }
+
+    function lunarDayText(day) {
+      const names = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+      if (day <= 0 || Number.isNaN(day)) return "";
+      if (day <= 10) return `初${names[day]}`;
+      if (day < 20) return `十${names[day - 10]}`;
+      if (day === 20) return "二十";
+      if (day < 30) return `廿${names[day - 20]}`;
+      if (day === 30) return "三十";
+      return String(day);
     }
 
     function branchFromHour(hour) {
@@ -1077,17 +1210,70 @@
       };
     }
 
-    function renderTrace(points, resultIndex) {
+    function phaseTotal(result, type) {
+      if (!result) return 0;
+      if (type === "month") return result.lunar.monthNumber;
+      if (type === "day") return result.lunar.dayNumber;
+      return result.branch.value;
+    }
+
+    function setPhaseStatus(point, result, completed = false) {
+      const status = $("phaseStatus");
+      if (!status) return;
+      if (!point) {
+        status.style.setProperty("--phase-color", "var(--gold)");
+        status.innerHTML = `<b>当前阶段</b><span>只看最终落点</span>`;
+        return;
+      }
+      const meta = PHASE_META[point.type];
+      const total = phaseTotal(result, point.type);
+      status.style.setProperty("--phase-color", meta.color);
+      status.innerHTML = `<b>${meta.label} · 第 ${point.cursor}/${total} 步</b><span>${completed ? "完成，定格最终结果" : meta.hint}</span>`;
+    }
+
+    function clearNodeState() {
       document.querySelectorAll(".node").forEach((node) => {
-        node.classList.remove("result", "active", "trace-month", "trace-day", "trace-hour");
+        node.classList.remove("result", "active", "active-month", "active-day", "active-hour", "trace-month", "trace-day", "trace-hour");
       });
-      points.forEach((point) => {
-        const node = $(`node-${point.index}`);
-        if (node) node.classList.add(`trace-${point.type}`);
-      });
-      const last = points[points.length - 1];
-      if (last && $(`node-${last.index}`)) $(`node-${last.index}`).classList.add("active");
-      if ($(`node-${resultIndex}`)) $(`node-${resultIndex}`).classList.add("result");
+      state.defaultResultIndex = null;
+    }
+
+    function renderDefaultState(result) {
+      const nodes = Array.from(document.querySelectorAll(".node"));
+      const alreadyDefault = state.defaultResultIndex === result.resultIndex
+        && nodes.every((node, index) => {
+          const shouldBeResult = index === result.resultIndex;
+          return node.classList.contains("result") === shouldBeResult
+            && !node.classList.contains("active")
+            && !node.classList.contains("active-month")
+            && !node.classList.contains("active-day")
+            && !node.classList.contains("active-hour")
+            && !node.classList.contains("trace-month")
+            && !node.classList.contains("trace-day")
+            && !node.classList.contains("trace-hour");
+        });
+      if (alreadyDefault) {
+        setPhaseStatus(null, result, true);
+        return;
+      }
+      clearNodeState();
+      if ($(`node-${result.resultIndex}`)) {
+        $(`node-${result.resultIndex}`).classList.add("result");
+      }
+      state.defaultResultIndex = result.resultIndex;
+      setPhaseStatus(null, result, true);
+    }
+
+    function renderTracePoint(point, result) {
+      clearNodeState();
+      const node = $(`node-${point.index}`);
+      if (node) node.classList.add("active", `active-${point.type}`);
+      setPhaseStatus(point, result, false);
+    }
+
+    function setPlaybackControls(isPlaying) {
+      $("playProcess").disabled = isPlaying;
+      $("stopProcess").disabled = !isPlaying;
     }
 
     function render(result) {
@@ -1096,7 +1282,8 @@
       state.trace = result.trace;
 
       $("clockTime").textContent = `${result.solar.hour}:${result.solar.minute}:${result.solar.second}`;
-      $("clockZone").textContent = `${result.timeZone} · ${result.solar.weekday}`;
+      const timeZoneLabel = $("timeZone").selectedOptions[0]?.textContent || result.timeZone;
+      $("clockZone").textContent = `${timeZoneLabel} · ${result.solar.weekday}`;
       $("resultIndex").textContent = `第 ${result.resultIndex + 1} 位`;
       $("resultName").textContent = item.name;
       $("resultBrief").textContent = item.short;
@@ -1104,7 +1291,7 @@
       $("resultChips").innerHTML = item.tags.map((tag) => `<span class="chip">${tag}</span>`).join("");
 
       $("solarText").textContent = `${result.solar.year}-${result.solar.month}-${result.solar.day} ${result.solar.hour}:${result.solar.minute}`;
-      $("lunarText").textContent = `${result.lunar.text}${result.lunar.isLeap ? "（闰月）" : ""}`;
+      $("lunarText").textContent = result.lunar.text;
       $("hourText").textContent = `${result.branch.name}时 · 第${result.branch.value}位 · ${result.branch.range}`;
       $("numbersText").textContent = `${result.lunar.monthNumber}月 + ${result.lunar.dayNumber}日 + ${result.branch.value}时`;
       $("toneText").textContent = item.tone;
@@ -1135,32 +1322,53 @@
       `).join("");
 
       SIX.forEach((_, index) => $(`six-${index}`)?.classList.toggle("current", index === result.resultIndex));
-      renderTrace([{ index: result.resultIndex, type: "hour" }], result.resultIndex);
+      renderDefaultState(result);
     }
 
     function update() {
       render(calculate());
     }
 
-    function playTrace(singleStep = false) {
+    function playTrace() {
       window.clearInterval(state.animationTimer);
+      window.clearTimeout(state.restoreTimer);
       const result = calculate();
       state.latest = result;
       state.trace = result.trace;
-      if (!singleStep) state.stepCursor = 0;
+      state.stepCursor = 0;
+      const interval = Number($("playSpeed")?.value) || 650;
+      state.isPlaying = true;
+      setPlaybackControls(true);
 
       const draw = () => {
-        const partial = state.trace.slice(0, state.stepCursor + 1);
-        renderTrace(partial, result.resultIndex);
+        const currentIndex = state.stepCursor;
+        const point = state.trace[currentIndex];
+        const isComplete = currentIndex >= state.trace.length - 1;
+        renderTracePoint(point, result);
         state.stepCursor += 1;
-        if (state.stepCursor >= state.trace.length) {
+        if (isComplete) {
           window.clearInterval(state.animationTimer);
           state.stepCursor = 0;
+          state.restoreTimer = window.setTimeout(() => {
+            state.isPlaying = false;
+            setPlaybackControls(false);
+            renderDefaultState(result);
+          }, interval);
         }
       };
 
       draw();
-      if (!singleStep) state.animationTimer = window.setInterval(draw, 170);
+      state.animationTimer = window.setInterval(draw, interval);
+    }
+
+    function stopTrace() {
+      window.clearInterval(state.animationTimer);
+      window.clearTimeout(state.restoreTimer);
+      state.isPlaying = false;
+      state.stepCursor = 0;
+      setPlaybackControls(false);
+      const result = calculate();
+      renderDefaultState(result);
     }
 
     async function copyResult() {
@@ -1182,7 +1390,7 @@
     update();
 
     window.setInterval(() => {
-      if ($("mode").value === "now") update();
+      if ($("mode").value === "now" && !state.isPlaying) update();
     }, 1000);
 
     $("mode").addEventListener("change", () => {
@@ -1202,14 +1410,9 @@
       update();
     });
     $("copyResult").addEventListener("click", copyResult);
-    $("playProcess").addEventListener("click", () => playTrace(false));
-    $("stepProcess").addEventListener("click", () => playTrace(true));
-    $("clearProcess").addEventListener("click", () => {
-      window.clearInterval(state.animationTimer);
-      state.stepCursor = 0;
-      const result = calculate();
-      renderTrace([{ index: result.resultIndex, type: "hour" }], result.resultIndex);
-    });
+    $("playProcess").addEventListener("click", playTrace);
+    $("stopProcess").addEventListener("click", stopTrace);
+    setPlaybackControls(false);
   </script>
 </body>
 </html>
