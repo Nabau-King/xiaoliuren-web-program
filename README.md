@@ -18,6 +18,8 @@
 - `index.html`：应用主页面，包含样式与交互逻辑。
 - `assets/palm-left-generated.png`：通过 imagegen 生成的左手掌主视觉。
 - `assets/palm-left-generated.webp`：压缩后的页面优先加载资源。
+- `assets/palm-realistic.png/.webp`：写实自然风左手掌。
+- `assets/palm-ink.png/.webp`：墨线稿风左手掌。
 - `assets/left-hand-palm.jpg`：早期参考底图，当前页面不依赖。
 - `manifest.json` / `sw.js`：PWA 安装与离线缓存支持。
 - `xlr-core.js` / `tests.js`：小六壬核心公式与基础测试。
@@ -39,7 +41,7 @@
 - 支持问事内容输入，并保存到历史记录与分享卡片。
 - 支持点击历史记录恢复当时的时间、时区、问事类型与问题。
 - 支持简洁建议、传统术语、行动清单三种解析风格。
-- 支持浅色/深色主题与三种手掌视觉风格。
+- 支持浅色/深色主题与水彩、写实、线稿三种真实手掌图片风格。
 - 支持首次打开新手引导。
 - 支持 PWA 安装和离线访问。
 

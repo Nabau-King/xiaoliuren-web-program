@@ -1,10 +1,14 @@
-const CACHE_NAME = "xiao-liu-ren-v1";
+const CACHE_NAME = "xiao-liu-ren-v2";
 const ASSETS = [
   "./",
   "./index.html",
   "./manifest.json",
   "./assets/palm-left-generated.webp",
   "./assets/palm-left-generated.png",
+  "./assets/palm-realistic.webp",
+  "./assets/palm-realistic.png",
+  "./assets/palm-ink.webp",
+  "./assets/palm-ink.png",
   "./assets/icon-192.png",
   "./assets/icon-512.png"
 ];

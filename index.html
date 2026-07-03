@@ -51,6 +51,7 @@
       --ink: #eef7f2;
       --muted: #aab8b0;
       --line: rgba(231, 241, 235, .16);
+      --shadow: 0 24px 70px rgba(0, 0, 0, .34);
       background:
         linear-gradient(135deg, rgba(197, 148, 66, .12), transparent 34%),
         linear-gradient(225deg, rgba(15, 117, 104, .2), transparent 36%),
@@ -156,6 +157,16 @@
       overflow: hidden;
     }
 
+    body.theme-dark .topbar,
+    body.theme-dark .panel {
+      background: rgba(22, 35, 31, .9);
+      box-shadow: var(--shadow);
+    }
+
+    body.theme-dark .panel-head {
+      background: rgba(20, 31, 28, .45);
+    }
+
     .side-panel {
       display: flex;
       flex-direction: column;
@@ -218,6 +229,17 @@
     body.theme-dark .mini-btn,
     body.theme-dark .coord-output {
       color: var(--ink);
+      background: #13201c;
+      border-color: rgba(231, 241, 235, .18);
+    }
+
+    body.theme-dark .field input::placeholder {
+      color: rgba(238, 247, 242, .42);
+    }
+
+    body.theme-dark .btn.secondary {
+      color: var(--ink);
+      border-color: rgba(231, 241, 235, .18);
       background: #13201c;
     }
 
@@ -316,6 +338,29 @@
       background: rgba(255, 255, 255, .62);
     }
 
+    body.theme-dark .metric,
+    body.theme-dark .analysis-card,
+    body.theme-dark .six-item,
+    body.theme-dark .advice-item,
+    body.theme-dark .history-item,
+    body.theme-dark .details-box details,
+    body.theme-dark .phase-status,
+    body.theme-dark .formula,
+    body.theme-dark .step {
+      background: rgba(19, 32, 28, .72);
+      border-color: rgba(231, 241, 235, .15);
+    }
+
+    body.theme-dark .analysis-card p,
+    body.theme-dark .six-item p,
+    body.theme-dark .advice-item p,
+    body.theme-dark .step span,
+    body.theme-dark .details-box .rule-body,
+    body.theme-dark .history-item span,
+    body.theme-dark .history-empty {
+      color: var(--muted);
+    }
+
     .metric span {
       display: block;
       margin-bottom: 6px;
@@ -405,6 +450,12 @@
       overflow: hidden;
     }
 
+    body.theme-dark .palm-wrap {
+      background:
+        radial-gradient(circle at 50% 38%, rgba(40, 58, 51, .92), rgba(18, 30, 26, .8) 60%, rgba(197, 148, 66, .1)),
+        #111c18;
+    }
+
     .palm-canvas {
       position: relative;
       width: min(92%, 520px);
@@ -422,16 +473,8 @@
       pointer-events: none;
     }
 
-    .palm-canvas.palm-ink .palm-img {
-      filter: grayscale(1) contrast(1.08) brightness(1.03) drop-shadow(0 22px 34px rgba(54, 43, 33, .12));
-    }
-
-    .palm-canvas.palm-soft .palm-img {
-      filter: saturate(.72) contrast(.96) brightness(1.06) drop-shadow(0 22px 34px rgba(54, 43, 33, .1));
-    }
-
-    .palm-canvas.palm-watercolor .palm-img {
-      filter: drop-shadow(0 22px 34px rgba(54, 43, 33, .12));
+    body.theme-dark .palm-img {
+      filter: drop-shadow(0 24px 40px rgba(0, 0, 0, .36));
     }
 
     .palm-canvas picture {
@@ -457,6 +500,17 @@
       box-shadow: 0 10px 24px rgba(33, 43, 39, .12);
       transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
       isolation: isolate;
+    }
+
+    body.theme-dark .node {
+      color: var(--ink);
+      background: rgba(19, 32, 28, .86);
+      border-color: rgba(231, 241, 235, .22);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, .22);
+    }
+
+    body.theme-dark .node small {
+      color: var(--muted);
     }
 
     .calibration-mode .node {
@@ -615,6 +669,11 @@
       box-shadow: inset 0 0 0 1px rgba(197, 148, 66, .12);
     }
 
+    body.theme-dark .analysis-card.focus {
+      background: rgba(197, 148, 66, .14);
+      border-color: rgba(197, 148, 66, .72);
+    }
+
     .analysis-card:nth-child(2) { border-left-color: var(--blue); }
     .analysis-card:nth-child(3) { border-left-color: var(--gold); }
     .analysis-card:nth-child(4) { border-left-color: var(--red); }
@@ -669,6 +728,14 @@
       border-top: 1px solid var(--line);
       padding: 14px 18px 18px;
       background: rgba(248, 242, 232, .6);
+    }
+
+    body.theme-dark .details-box,
+    body.theme-dark .calibration-panel,
+    body.theme-dark .history-panel,
+    body.theme-dark .notice,
+    body.theme-dark .process {
+      background: rgba(14, 24, 21, .52);
     }
 
     .details-box details {
@@ -827,6 +894,10 @@
       padding: 22px;
       background: var(--surface);
       box-shadow: var(--shadow);
+    }
+
+    body.theme-dark .onboarding-card {
+      background: #16231f;
     }
 
     .onboarding-card h2 {
@@ -1149,7 +1220,7 @@
               <label for="palmTheme">手掌风格</label>
               <select id="palmTheme">
                 <option value="watercolor">水彩</option>
-                <option value="soft">柔和</option>
+                <option value="realistic">写实</option>
                 <option value="ink">线稿</option>
               </select>
             </div>
@@ -1214,8 +1285,8 @@
         <div class="palm-wrap">
           <div class="palm-canvas" id="palmCanvas">
             <picture>
-              <source srcset="assets/palm-left-generated.webp" type="image/webp">
-              <img class="palm-img" src="assets/palm-left-generated.png" alt="左手掌心插画，拇指在左侧">
+              <source id="palmSource" srcset="assets/palm-left-generated.webp" type="image/webp">
+              <img class="palm-img" id="palmImage" src="assets/palm-left-generated.png" alt="左手掌心插画，拇指在左侧">
             </picture>
             <div id="nodes"></div>
           </div>
@@ -1440,6 +1511,24 @@
       feeling: "感情"
     };
 
+    const PALM_THEMES = {
+      watercolor: {
+        webp: "assets/palm-left-generated.webp",
+        png: "assets/palm-left-generated.png",
+        label: "水彩手绘左手掌"
+      },
+      realistic: {
+        webp: "assets/palm-realistic.webp",
+        png: "assets/palm-realistic.png",
+        label: "写实自然左手掌"
+      },
+      ink: {
+        webp: "assets/palm-ink.webp",
+        png: "assets/palm-ink.png",
+        label: "墨线稿左手掌"
+      }
+    };
+
     const TIME_ZONE_GROUPS = [
       ["常用", ["Asia/Shanghai", "Asia/Taipei", "Asia/Hong_Kong", "Asia/Singapore", "UTC"]],
       ["亚洲", ["Asia/Tokyo", "Asia/Seoul", "Asia/Bangkok", "Asia/Kuala_Lumpur", "Asia/Dubai"]],
@@ -1491,10 +1580,14 @@
 
     function applyPalmTheme() {
       const theme = $("palmTheme").value;
-      const canvas = $("palmCanvas");
-      if (!canvas) return;
-      canvas.classList.remove("palm-watercolor", "palm-soft", "palm-ink");
-      canvas.classList.add(`palm-${theme}`);
+      const asset = PALM_THEMES[theme] || PALM_THEMES.watercolor;
+      const source = $("palmSource");
+      const image = $("palmImage");
+      if (source) source.srcset = asset.webp;
+      if (image) {
+        image.src = asset.png;
+        image.alt = `${asset.label}，拇指在左侧`;
+      }
       localStorage.setItem("xlrPalmTheme", theme);
     }
 
@@ -2141,7 +2234,8 @@
       const result = state.latest || calculate();
       const item = SIX[result.resultIndex];
       const summary = resultSummary(result);
-      const handImage = await loadImage("assets/palm-left-generated.webp").catch(() => null);
+      const palmAsset = PALM_THEMES[$("palmTheme").value] || PALM_THEMES.watercolor;
+      const handImage = await loadImage(palmAsset.webp).catch(() => loadImage(palmAsset.png).catch(() => null));
       const canvas = document.createElement("canvas");
       canvas.width = 1080;
       canvas.height = 1440;
